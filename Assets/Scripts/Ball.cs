@@ -1,4 +1,7 @@
+using System;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Random = UnityEngine.Random;
 
 // to do list bounce just continues along the same path -> fix that
 // make it so id the ball hits the net it restarts the scene again or destroys ball and reinstantiates the players in the original position
@@ -13,65 +16,68 @@ public class Ball : MonoBehaviour
 
     private readonly int speed = 12;
 
-    private Vector2 invertYAxis= new Vector2(1,-1);
+    private readonly float speedMultiplier = 2f;
+
     private Vector2 invertXAxis = new Vector2(-1, 1);
 
-    private Vector2 zeroXAxis = new Vector2(0, 1);
-    private Vector2 negativeZeroXAxis = new Vector2(0, -1);
-
-    private Vector2 zeroYAxis = new Vector2(1, 0);
-    private Vector2 negativeZeroYAxis = new Vector2(-1, 0);
-
-
-
-
-    private Vector2 startDirection;
+    private Vector2 currentDirection;
 
     // Start is called before the first frame update
     void Start()
     {
         rigidBody = GetComponent<Rigidbody2D>();
 
-        startDirection = new Vector2(RandomStartDirection(), RandomStartDirection()).normalized;
+        currentDirection = new Vector2(RandomStartDirection(), RandomStartDirection()).normalized;
+
+        rigidBody.velocity = currentDirection * speed;
+
         //startDirection = new Vector2(1, 0).normalized; //-> direction test code
     }
 
     // Update is called once per frame
     private void Update()
     {
-        rigidBody.velocity = startDirection * speed;
 
-        //RandomDirection();
+    }
 
+    private void PlayerBounce(Transform collidedObject)
+    {
+        Vector2 ballPosition = transform.position;
+        Vector2 playerPosition = collidedObject.position;
+
+        float xDirection;
+        float yDirection = 0;
+
+        if (ballPosition.y > 0) 
+        {
+            yDirection = -1;
+        }
+        else if (ballPosition.y < 0) 
+        {
+            yDirection = 1;
+        }
+
+        xDirection = (ballPosition.x - playerPosition.x) / collidedObject.GetComponent<Collider2D>().bounds.size.x;
+
+        currentDirection = new Vector2(xDirection, yDirection);
+
+        rigidBody.velocity = currentDirection * speed * speedMultiplier;
+    }
+
+    private void WallBounce()
+    {
+        currentDirection *= invertXAxis;
     }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        Debug.Log(other.gameObject);
-
         if (other.gameObject.CompareTag(PLAYER_TAG))
         {
-            if (startDirection == zeroXAxis || startDirection == negativeZeroXAxis)
-            {
-                startDirection += new Vector2(0.25f, 0);
-                startDirection *= invertYAxis;
-            }
-            else
-            {
-                startDirection *= invertYAxis;
-            }
+            PlayerBounce(other.transform);
         }
-        else if (other.gameObject.CompareTag(BOUNDARY_TAG))
+        else if (other.gameObject.CompareTag(BOUNDARY_TAG)) 
         {
-            if (startDirection == zeroYAxis || startDirection == negativeZeroYAxis)
-            {
-                startDirection += new Vector2(0f, 0.25f);
-                startDirection *= invertXAxis;
-            }
-            else 
-            {
-                startDirection *= invertXAxis;
-            }
+            WallBounce();
         }
     }
 

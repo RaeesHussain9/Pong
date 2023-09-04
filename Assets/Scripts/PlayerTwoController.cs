@@ -12,6 +12,8 @@ namespace Assets.Scripts
 
         private SpriteRenderer spriteRender;
 
+        private Rigidbody2D rb;
+
         private PlayerMovement moveScript;
 
         private readonly int moveSpeed = 16;
@@ -23,6 +25,7 @@ namespace Assets.Scripts
         {
             moveScript = player2.GetComponent<PlayerMovement>();
             spriteRender = GetComponent<SpriteRenderer>();
+            rb = GetComponent<Rigidbody2D>();
         }
 
         private void Start()
@@ -44,36 +47,46 @@ namespace Assets.Scripts
         // Update is called once per frame
         void Update()
         {
-            Vector2 inputVector = new Vector2(0, 0);
+            //Vector2 inputVector = new Vector2(0, 0);
+            Vector2 _Direction = new Vector2(0,0);
 
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                inputVector.x = -1;
-            }
-            else if (Input.GetKey(KeyCode.UpArrow))
-            {
-                inputVector.y = 1;
-            }
-            else if (Input.GetKey(KeyCode.DownArrow))
-            {
-                inputVector.y = -1;
+                //inputVector.x = -1;
+
+                _Direction = Vector2.left;
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
-                inputVector.x = 1;
+                //inputVector.x = 1;
+
+                _Direction = Vector2.right;
             }
 
-            inputVector *= moveSpeed * Time.deltaTime;
+            rb.velocity = _Direction * moveSpeed;
 
-            var xValidPosition = Mathf.Clamp(transform.position.x + inputVector.x, xMin, xMax);
-            var yValidPosition = Mathf.Clamp(transform.position.y + inputVector.y, yMin, yMax);
+            //inputVector *= moveSpeed * Time.deltaTime;
 
-            transform.position = new Vector3(xValidPosition, yValidPosition, 0f);
+            //var xValidPosition = Mathf.Clamp(transform.position.x + inputVector.x, xMin, xMax);
+            //var yValidPosition = Mathf.Clamp(transform.position.y + inputVector.y, yMin, yMax);
 
-            Vector2 vel = GetComponent<Rigidbody2D>().velocity;
-
-            Debug.Log("player 2 velocity");
-            Debug.Log(vel);
+            //transform.position = new Vector3(xValidPosition, yValidPosition, 0f);
         }
     }
+
+    // constant movement in one direction code
+
+    //if (Input.GetKey(KeyCode.LeftArrow))
+    //        {
+    //            //inputVector.x = -1;
+
+    //            rb.velocity = Vector2.left* moveSpeed;
+    //}
+    //        else if (Input.GetKey(KeyCode.RightArrow))
+    //{
+    //    //inputVector.x = 1;
+
+    //    rb.velocity = Vector2.right * moveSpeed;
+    //}
+
 }
